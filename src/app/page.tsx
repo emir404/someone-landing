@@ -1,28 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Header from "@/components/Header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const easeOutExpo = [0.16, 1, 0.3, 1];
+const WAITLIST_STORAGE_KEY = "someone_waitlist_joined";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user has already joined on mount
+  useEffect(() => {
+    const hasJoined = localStorage.getItem(WAITLIST_STORAGE_KEY);
+    if (hasJoined) {
+      setIsSubmitted(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setEmail("");
+    setError(null);
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 409) {
+        // Email already exists - still mark as success
+        localStorage.setItem(WAITLIST_STORAGE_KEY, email);
+        setIsSubmitted(true);
+        setEmail("");
+      } else if (!response.ok) {
+        setError(data.error || "Something went wrong");
+      } else {
+        // Success
+        localStorage.setItem(WAITLIST_STORAGE_KEY, email);
+        setIsSubmitted(true);
+        setEmail("");
+      }
+    } catch {
+      setError("Failed to connect. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -46,7 +80,7 @@ export default function Home() {
               on the internet
             </motion.h1>
 
-            <div className="h-[108px] sm:h-[50px] flex items-center">
+            <div className="min-h-[108px] sm:min-h-[50px] flex items-start">
               <AnimatePresence mode="wait">
                 {isSubmitted ? (
                   <motion.div
@@ -109,17 +143,21 @@ export default function Home() {
                       ease: easeOutExpo,
                     }}
                     onSubmit={handleSubmit}
-                    className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto"
+                    className="flex flex-col gap-2 w-full sm:w-auto"
                   >
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="emir@witharc.co"
-                      className="w-full sm:w-80"
-                      disabled={isSubmitting}
-                      required
-                    />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (error) setError(null);
+                        }}
+                        placeholder="emir@witharc.co"
+                        className="w-full sm:w-80"
+                        disabled={isSubmitting}
+                        required
+                      />
                     <motion.div
                       initial={false}
                       animate={{ width: isSubmitting ? 50 : "auto" }}
@@ -181,6 +219,20 @@ export default function Home() {
                         </AnimatePresence>
                       </Button>
                     </motion.div>
+                    </div>
+                    <AnimatePresence>
+                      {error && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-white/90 text-sm font-medium"
+                        >
+                          {error}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
                   </motion.form>
                 )}
               </AnimatePresence>
