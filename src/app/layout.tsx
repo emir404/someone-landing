@@ -30,6 +30,29 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  openGraph: {
+    title: "Someone - Own your name on the internet",
+    description:
+      "Claim your unique identity on the internet. Join the waitlist today.",
+    url: "https://someo.ne",
+    siteName: "Someone",
+    images: [
+      {
+        url: "/og_image.png",
+        width: 1200,
+        height: 630,
+        alt: "Someone - Own your name on the internet",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Someone - Own your name on the internet",
+    description:
+      "Claim your unique identity on the internet. Join the waitlist today.",
+    images: ["/og_image.png"],
+  },
 };
 
 export default function RootLayout({
