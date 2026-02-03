@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const easeOutExpo = [0.16, 1, 0.3, 1];
+const easeOutExpo = [0.16, 1, 0.3, 1] as const;
 const WAITLIST_STORAGE_KEY = "someone_waitlist_joined";
 
 export default function Home() {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import Logo from "./Logo";
 
-const easeOutExpo = [0.16, 1, 0.3, 1];
+const easeOutExpo = [0.16, 1, 0.3, 1] as const;
 
 export default function Header() {
   return (
