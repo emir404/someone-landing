@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const dieGrotesk = localFont({
@@ -62,7 +63,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dieGrotesk.variable} antialiased`}>{children}</body>
+      <body className={`${dieGrotesk.variable} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
